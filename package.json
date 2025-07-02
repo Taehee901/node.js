@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@ljharb/tsconfig": "^0.3.2"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "json-server": "^1.0.0-beta.3",
+    "multer": "^2.0.1"
+  }
+}
