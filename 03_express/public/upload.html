@@ -1,0 +1,47 @@
+<!--upload-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h3>파일업로드</h3>
+    <!--업로드처리multipart-->
+    <form action="upload" method="post" enctype="multipart/form-data">
+      <table>
+        <tr>
+          <td>이름:</td>
+          <td><input type="text" name="myName" /></td>
+        </tr>
+        <tr>
+          <!--확장자없이 이미지만 처리accept="image/*",multiple여러개선택 업로드시-->
+          <td>파일:</td>
+          <td>
+            <input type="file" accept="image/*" multiple name="myFile" />
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" align="center">
+            <input type="submit" value="업로드" />
+          </td>
+        </tr>
+      </table>
+    </form>
+    <button id="btn">클릭.</button>
+    <script>
+      //동일하지않을경우리소스에서데이터가져오지x,coRS미들웨어 모듈,다른리소스에서도동일하게 다른서버
+      //클릭이벤트,이벤트핸들러
+      //https://developer.mozilla.org/ko/docs/Web/Security/Same-origin_policy
+      //보안상(csrf공격)이유로 웹브라우저 동일한 출처(리소스)인지 확인 후 아닐경우데이터를가져오지못하도록만들어둠,http프로토콜,호스트이름,포트까지 같은 경우 동일 페이지로 인식 처리
+      document.querySelector("#btn").addEventListener("click", function (e) {
+        //http://localhost:3000/getCors
+        fetch("getCors")
+          .then((resolve) => resolve.json())
+          .then((result) => console.log(result))
+          .catch((err) => console.log(err));
+      });
+    </script>
+  </body>
+</html>

@@ -1,14 +1,14 @@
 {
-  "post": [
+  "posts": [
     {
       "id": "2",
-      "title": "Json서버에서 추가함.",
-      "author": "json"
+      "title": "2번수정fetch5연습",
+      "author": "admin"
     },
     {
-      "id": "3",
-      "title": "바뀐 타이틀",
-      "author": "바뀐 작성자"
+      "id": "9",
+      "title": "fetch연습",
+      "author": "admin"
     },
     {
       "id": "1",
@@ -16,8 +16,18 @@
       "author": "json"
     },
     {
-      "id": 9,
+      "id": 3,
       "title": "fetch연습",
+      "author": "admin"
+    },
+    {
+      "id": 5,
+      "title": "fetch5연습",
+      "author": "admin"
+    },
+    {
+      "id": 5,
+      "title": "fetch5연습",
       "author": "admin"
     }
   ]
