@@ -56,6 +56,7 @@ function query(alias, values) {
     }
   );
 }
+//
 //1.쿼리이름 2.전달할 값......
 //query("customerList");
 query("customerInsert", {
