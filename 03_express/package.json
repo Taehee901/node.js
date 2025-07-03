@@ -1,0 +1,14 @@
+{
+  "name": "node-project",
+  "version": "1.0.0",
+  "description": "node, express api server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "김태희",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
