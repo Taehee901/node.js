@@ -5,8 +5,8 @@ const bodyParser = require("body-parser");
 require("dotenv").config({ path: "./sql/.env" }); //env 파일 경로를 path지정
 
 //환경변수읽어올때
-console.log(process.env.HOST);
-console.log(process.env.USER);
+// console.log(process.env.HOST);
+// console.log(process.env.USER);
 const mysql = require("./sql"); //index.js는생략가능해서 폴더이름만 작성해줘도 된다. ./sql/index
 
 // const custSql = require("./sql/customerSql"); //반환 객체,{customerList,customerIn~},상수에담긴값이 쿼리 객체 값이 반환
@@ -93,9 +93,9 @@ app.delete("/customer/:id", async (req, res) => {
     //header랑 body영역에 정보 x
     //console.log(id, name); //파라미터 여러개 날리고 싶으면
 
-    let result = await mysql.query("cutomerDelete", id); //넘버타입을 전달
+    let result = await mysql.query("customerDelete", id); //넘버타입을 전달
     //res.send(req.params);postmen에서  params값 확인,[Object: null prototype] { id: '8' }
-    req.send(result);
+    res.send(result); //req.로 하니 에러남
   } catch (err) {
     res.send("에러발생=>", err);
   }
