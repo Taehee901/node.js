@@ -2,12 +2,18 @@
 // const mysql = require("mysql2");
 const express = require("express");
 const bodyParser = require("body-parser");
+const path = require("path"); //내장객체라 설치x
+const multer = require("multer");
+const xlsx = require("xlsx"); //엑셀시트 분리하는 기능이 있음.
 require("dotenv").config({ path: "./sql/.env" }); //env 파일 경로를 path지정
+require("dotenv").config({ path: "./nodemailer/.env" });
+const nodemailer = require("./nodemailer"); //index.js 안적어도 알아서  import해줌
 
 //환경변수읽어올때
 // console.log(process.env.HOST);
 // console.log(process.env.USER);
 const mysql = require("./sql"); //index.js는생략가능해서 폴더이름만 작성해줘도 된다. ./sql/index
+const { findSourceMap } = require("module");
 
 // const custSql = require("./sql/customerSql"); //반환 객체,{customerList,customerIn~},상수에담긴값이 쿼리 객체 값이 반환
 //pool 데이터베이스를 사용반환반복{db정보넣어주면됨}
@@ -26,7 +32,128 @@ app.use(bodyParser.json()); //json 의 형태의 값을 body영역에 사용,url
 app.get("/", (req, res) => {
   res.send("Root 경로");
 });
+//이메일 발송 화면.
+//이메일주소,get방식이면 페이지 열어주는거
+app.get("/email", (req, res) => {
+  //sendFile절대경로기준으로
+  res.sendFile(path.join(__dirname, "public", "index.html")); //path경로편하게 지정.__현재기준기준,여러경로합쳐서 경로보여주고 싶을 때 join
+});
+
 //에러발생,new
+// app.get("/test", (rep, res) => {
+//   // console.log("test");
+//   res.send("test");
+// });
+
+//실제 이메일 전송.
+app.post("/email", async (rep, res) => {
+  try {
+    let result = await nodemailer.sendEmail(rep.body.param); //반환결과값을 sendEmail호출하는데서 값을 던짐
+    console.log(result); //undefined 리턴해주는 값이 없어서..,promise 써서 함수에 값전달해줘서?
+    //res.send("메일발송성공");
+    res.json({ retCode: "success", retVal: result }); //{"retCode":"success"}
+  } catch (err) {
+    //res.send("메일발송성공");
+    res.json({ retCode: "fail" });
+  }
+});
+//엑셀 업로드 -> DB insert.
+//multer
+// //Multer 인스턴스 생성.
+// const upload = multer({
+//   storage: storage, //저장공간
+//   limits: { fileSize: 5 * 1024 * 1024 },
+// });
+
+// app.get("/excel", (req, res) => {
+//   //sendFile절대경로기준으로
+//   res.sendFile(path.join(__dirname, "public", "excel.html"));
+// });
+
+// //첨부처리.
+// app.get("/excel", upload.single("myFile"), (req, res) => {
+//   console.log(req.file); //업로드된 파일의 정보
+//   console.log(req.body); //요청몸체의 정보.
+//   const workbook = xlsx.readFile(`./uploads/${req.file.filename}`);
+//   const firstSheetName = workbook.SheetNames[0]; //첫번째 시트.
+//   if (!req.file) {
+//     res.send("파일 처리가능함.");
+//   } else {
+//     res.send("업로드 완료.");
+//   }
+// });
+// //저장경로와 파일명 지정.
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     //저장경로.
+//     cb(null, "uploads");
+//   },
+
+//   filename: function (req, file, cb) {
+//     //업로드 파일명
+//     let fn = Buffer.from(file.originalname, "latin1").toString("utf-8");
+//     cb(null, Date.now() + "_" + fn); //
+//   },
+// });
+// ① storage 먼저 선언
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads");
+  },
+  filename: function (req, file, cb) {
+    let fn = Buffer.from(file.originalname, "latin1").toString("utf-8");
+    cb(null, Date.now() + "_" + fn);
+  },
+});
+
+// ② 그 다음 upload 선언
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+// ③ 이후 라우터들
+app.get("/excel", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "excel.html"));
+});
+
+app.post("/excel", upload.single("myFile"), (req, res) => {
+  console.log(req.file);
+  console.log(req.body);
+  const workbook = xlsx.readFile(`./uploads/${req.file.filename}`);
+  //시트명으로 첫번째 시트가져오기.
+  //const firstSheetName = xlsx.utils.sheet_to_json(firstSheetName);
+  const firstSheetName = workbook.SheetNames[0];
+  //첫번째 시트의 데이터를 json값으로 가져온 녀석을 객체로 생성.
+  //const firstSheet = workbook.SheetNames[0]; //첫번째 시트.
+  const firstSheet = workbook.Sheets[firstSheetName];
+  const firstSheetJson = xlsx.utils.sheet_to_json(firstSheet); //시트 데이터를 JSON 배열로 변환해 주는 함수
+  console.log(firstSheetJson);
+  //반복문 활용.insert
+  // firstSheetJson.forEach(async (customer) => {
+  //   let result = await mysql.query("cusotmerInsert", customer);
+  //   console.log(result);
+  // });
+  //반복문2.
+  const fsj = firstSheetJson //{{a},{b},{k},{b}}
+    .sort((a, b) => {
+      //sort 두 수 비교하는데 가장 작은 수 될 때까지 반복,음의값이나오도록하면 오름차순.. 양의값이나오도록하면 내림차순
+      return a.name < b.name; //오름차순(1,3,4,6), 내림차순(+값이 나오면),두개 결과 값 (-) 오름차순 = a.name-b.name == a.name < b.name
+    });
+  //정렬된 배열을 다시 생성.
+  fsj.forEach(async (customer) => {
+    let result = await mysql.query("customerInsert", customer); //await x=>먼저끝난데이터가 들어가짐 순서 엉망
+  });
+  // .forEach(async (customer) => {
+  //   let result = await mysql.query("cutomerInsert", customer);
+  // });
+  //파일여러개일 경우 1->2
+  if (!req.file) {
+    res.send("파일 처리가능함.");
+  } else {
+    res.send("업로드 완료.");
+  }
+});
 
 //조회
 //frontcontrl,url실행컨틀롤러등록한것처럼 요청이들어오면 이 안에 있는걸 실행하겠다.요청방식이 달라지면 다른 crud처리를 하게 됨
@@ -53,6 +180,7 @@ app.get("/customers", async (req, res) => {
     res.send("에러발생=>", err);
   }
 });
+
 //insert는 요청정보에 값담아서 전달..
 //추가,요청정보가 body 영역에 데이터가 넘어옴..,몸체해석하는기능을 하는게 body-parser
 app.post("/customer", async (req, res) => {
