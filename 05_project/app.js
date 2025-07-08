@@ -3,20 +3,33 @@ const express = require("express");
 require("dotenv").config({ path: "./mysql/.env" });
 const { query } = require("./mysql/index.js");
 const fs = require("fs");
+const path = require("path");
 //const bodyParser = require("body-parser"); //express 내장모듈
 //환경변수값
 
-const app = express();
+const app = express(); //인스턴스 생성.
 //body-parser
-app.use(express.json());
+app.use(express.json({ limit: "10mb" })); //크기지정,10kb ->10mb
 
 app.listen(3000, () => {
+  //서버실행
   console.log("npm install");
   console.log("http://localhost:3000");
 });
 app.get("/", (req, res) => {
+  //"라우팅"정보들어오면
   res.send("Root Roulter");
 });
+//path모듈이 있을 경우 -> join 메소드로 함수호출하는 것처럼보이게 사용
+app.get("/fileupload", (req, res) => {
+  //__dirname현재경로 + 폴더명 + index.html
+  res.sendFile(path.join(__dirname, "public", "index.html")); //특정위치의 파일을 열어줄때 사용,app.js기준으로 -> git-node-05위치-./,전체경로를 다 적어도 되는데 경로바뀔때마다 바꿔야 해서 아래와 같이 사용
+});
+
+// app.get("/fileupload", (req, res) => {
+//   //__dirname현재경로
+//   res.sendFile(__dirname + "/public/index.html"); //특정위치의 파일을 열어줄때 사용,app.js기준으로 -> git-node-05위치-./,전체경로를 다 적어도 되는데 경로바뀔때마다 바꿔야 해서 아래와 같이 사용
+// });
 
 //다운로드,아이디값 파라미터,그 상품 중 어떤걸 다운할건지(파일이름)
 app.get("/download/:productId/:fileName", (req, res) => {
@@ -34,15 +47,30 @@ app.get("/download/:productId/:fileName", (req, res) => {
     res.send("파일이 없습니다."); //경로파일에 안맞게 입력하면
   } else {
     fs.createReadStream(filepath).pipe(res); //파일을응답정보에복사하고는 끝,pipe복사
-    res.send("다운로드 완료.");
+    //res.send("다운로드 완료.");
   }
 });
-//업로드
-
+//업로드 ,:파라미터
+app.post("/upload/:filename", (req, res) => {
+  //객체나 배열에서 원하는 값만 뽑아 변수로 쉽게 만드는  == 디스트럭처링
+  const { filename } = req.params; // /:product가 있을 경우의 params => {filename:'sample.jpg',product:3},오브젝트 Destructuring
+  // express.urlencoded();
+  const filePath = `${__dirname}/uploads/${filename}`; //d:../05_project/uploads/sample.jpg
+  //+8 base64이후의 값을 넣어주기 위해서,slice문자열을 잘라내는거,여기서는 lastIndexOf부분을 잘라냄
+  //jsp와 비교시
+  let data = req.body.data.slice(req.body.data.lastIndexOf(";base64,") + 8); // axios에서 넘겨줄때 data로 넘겨줌
+  fs.writeFile(filePath, data, "base64", (err) => {
+    if (err) {
+      res.send("error");
+    } else {
+      res.send("success");
+    }
+  });
+});
 //데이터쿼리
-
 //라우팅정보를 통해서 실행할 쿼리지정.:alias => url 호출 =>localhost:3000/api/productList()
 app.post("/api/:alias", async (req, res) => {
+  //url쿼리들고옴
   // console.log(req.params.alias);
   // console.log(req.body.where);[]
   console.log(req.body.param); //param:

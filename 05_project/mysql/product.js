@@ -79,8 +79,7 @@ module.exports = {
   //회원가입,동일키 들어가면 업데이트 아닐경우 추가
 
   // signUp: {
-  //   query: `insert into t_user set ?
-  //           on   duplicate key  update ?`,
+  //   query: `insert into t_user set ? on   duplicate key  update ?`,
   // },
   signUp: {
     query: `insert into t_user set ?

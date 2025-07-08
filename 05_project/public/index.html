@@ -1,0 +1,52 @@
+<!--input:file //업로드관련 페이지. ,submit하면 form action - 이벤트 달기위해 button 타입-->
+<!--vue 에서는 -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=\, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <form action="">
+      <!--이미지선택시 change이미지가 발생 ->업로드는 button 눌렀을때,이미지의 이진값을 문자타입을 정보로 변환해주는 함수사용함-->
+      <input type="file" name="base64" />
+      <button type="button">Upload</button>
+    </form>
+    <script>
+      //프라미스로 동기방식으로 변경
+      let data = ""; //이벤트타겟,base64 인코딩 데이터.
+      let fn; //파일명
+      //파일선택.,name=""에 해당하는 input태그에 이벤트
+      document
+        .querySelector('input[name="base64"]')
+        .addEventListener("change", (e) => {
+          //console.dir(e.target.files[0]); //객체구조봄,파일여러개 선택될수있어서
+          let file = e.target.files[0]; //name속성. => 생성된 파일명은 name속성을 활용하고 있었음
+          fn = file.name; //실제값담음
+          let fr = new FileReader();
+          fr.onload = function (evt) {
+            console.log(evt.target); //base64뒤부터가실제파일값(axios라이브러리이용해서 전달할 값)
+            data = evt.target.result;
+          };
+          fr.readAsDataURL(file);
+        });
+      //저장기능
+      document
+        .querySelector('button[type="button"]')
+        .addEventListener("click", async (e) => {
+          //앞에 있는 속성들을 지정하는 함수는 axios에 포함된거,전달값은 객체타입
+          let result = await axios({
+            method: "post",
+            url: "/upload/" + fn,
+            //key != value
+            // data: { data: data },
+            //key == value
+            data: { data },
+          });
+          console.log(result);
+        });
+    </script>
+  </body>
+</html>
