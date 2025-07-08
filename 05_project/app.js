@@ -9,6 +9,14 @@ const path = require("path");
 
 const app = express(); //인스턴스 생성.
 //body-parser
+
+//업로드 경로 확인.
+let uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+  //d://div/git..../05_project/uploads
+  fs.mkdirSync(uploadDir);
+}
+
 app.use(express.json({ limit: "10mb" })); //크기지정,10kb ->10mb
 
 app.listen(3000, () => {
@@ -51,13 +59,24 @@ app.get("/download/:productId/:fileName", (req, res) => {
   }
 });
 //업로드 ,:파라미터
-app.post("/upload/:filename", (req, res) => {
+app.post("/upload/:filename/:pid", (req, res) => {
   //객체나 배열에서 원하는 값만 뽑아 변수로 쉽게 만드는  == 디스트럭처링
-  const { filename } = req.params; // /:product가 있을 경우의 params => {filename:'sample.jpg',product:3},오브젝트 Destructuring
+  const { filename, pid } = req.params; // /:product가 있을 경우의 params => {filename:'sample.jpg',product:3},오브젝트 Destructuring
   // express.urlencoded();
-  const filePath = `${__dirname}/uploads/${filename}`; //d:../05_project/uploads/sample.jpg
+  //
+  //상품폴더
+  let productDir = path.join(uploadDir, pid);
+  if (!fs.existsSync(productDir)) {
+    //d://div/git..../05_project/uploads
+    fs.mkdirSync(productDir);
+  }
+  //오타 주의 path.vasename = .basename변경
+  const safeFilename = path.basename(filename); //경로공격.
+  const filePath = path.join(uploadDir, pid, safeFilename); //upload경로에 pid,경로
+  //const filePath = `${__dirname}/uploads/${pid}/${filename}`; //d:../05_project/uploads/sample.jpg
   //+8 base64이후의 값을 넣어주기 위해서,slice문자열을 잘라내는거,여기서는 lastIndexOf부분을 잘라냄
   //jsp와 비교시
+
   let data = req.body.data.slice(req.body.data.lastIndexOf(";base64,") + 8); // axios에서 넘겨줄때 data로 넘겨줌
   fs.writeFile(filePath, data, "base64", (err) => {
     if (err) {
