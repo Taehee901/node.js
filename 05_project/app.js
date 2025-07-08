@@ -1,4 +1,4 @@
-//먼저 실행됨
+//먼저 실행됨,테스트
 const express = require("express");
 require("dotenv").config({ path: "./mysql/.env" });
 const { query } = require("./mysql/index.js");
