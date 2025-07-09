@@ -1,9 +1,10 @@
 //query 모듈 crud 할때마다 호출 힘듦,같은경로라서 폴더 뺌"./sql/customerSql"
 //mysql과 관련된 것들
 const mysql = require("mysql2");
-const sql = require("./product"); //.js가 존재해도되고안해도상관 x
+const sql = require("./product.js"); //.js가 존재해도되고안해도상관 x
 //직접정보 x - DB연결을 아래와 같이 환경변수에 등록된 값 이름을  불러오는 걸로 사용해야 한다
 //보안요구하는 정보들...(외부노출x 새파일에 정보생성후 ->환경변수에 값 할당하여 처리 ->git 오픈할 경우 위험 가능성 git 숨김설정)
+//세션여러개담는
 const pool = mysql.createPool({
   //환경변수
   host: process.env.HOST,

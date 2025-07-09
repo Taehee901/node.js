@@ -6,6 +6,16 @@ const { query } = require(".");
 
 //? 자리에 들어갈 값을 배열로 전달하면 자동으로 이스케이프 처리돼서 Injection 방지됨.
 module.exports = {
+  //const { query } = require(".");
+  //todo목록.
+  todoList: {
+    query: `select * from tbl_todo`,
+  },
+  //todo삭제
+  todoDelete: {
+    query: `delete from tbl_todo where id = ?`,
+  },
+
   //상품 목록.
   productList: {
     query: `select t1.*,t2.path,t3.category1,t3.category2,t3.category3
@@ -78,14 +88,14 @@ module.exports = {
   },
   //회원가입,동일키 들어가면 업데이트 아닐경우 추가
 
-  // signUp: {
-  //   query: `insert into t_user set ? on   duplicate key  update ?`,
-  // },
   signUp: {
-    query: `insert into t_user set ?
-            ON DUPLICATE KEY UPDATE
-            email = VALUES(email),
-            type = VALUES(type),
-            nickname = VALUES(nickname);`,
+    query: `insert into t_user set ? on   duplicate key  update ?`,
   },
+  // signUp: {
+  //   query: `insert into t_user set ?
+  //           ON DUPLICATE KEY UPDATE
+  //           email = VALUES(email),
+  //           type = VALUES(type),
+  //           nickname = VALUES(nickname);`,
+  // },
 };

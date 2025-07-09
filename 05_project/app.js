@@ -4,10 +4,13 @@ require("dotenv").config({ path: "./mysql/.env" });
 const { query } = require("./mysql/index.js");
 const fs = require("fs");
 const path = require("path");
+const cors = require("cors");
+//cros origin 정책
 //const bodyParser = require("body-parser"); //express 내장모듈
 //환경변수값
 
 const app = express(); //인스턴스 생성.
+
 //body-parser
 
 //업로드 경로 확인.
@@ -18,6 +21,7 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 app.use(express.json({ limit: "10mb" })); //크기지정,10kb ->10mb
+app.use(cors());
 
 app.listen(3000, () => {
   //서버실행
@@ -96,3 +100,27 @@ app.post("/api/:alias", async (req, res) => {
   const result = await query(req.params.alias, req.body.param, req.body.where);
   res.send(result);
 });
+//mock서버128p 대신 ajox =>128p
+//todo목록
+app.get("/todoList", async (req, res) => {
+  // const result = await query("select * from tbl_todo");
+  const result = await query("todoList");
+  console.log(result);
+  res.json(result);
+});
+//todo삭제
+app.delete("/todo/:id", async (req, res) => {
+  const { id } = req.params;
+  // const result = await query("todoDelete", req.params.id);
+  try {
+    const result = await query("todoDelete", id); //아이디속성값가져옴,쿼리,파라미터 전달
+    res.json(result);
+  } catch (err) {
+    res.json(err);
+  }
+});
+// //todo추가
+// app.post("/todoList/:name/:chk", async (req, res) => {
+//   const result = await query("productInsert");
+//   res.json(result);
+// });
