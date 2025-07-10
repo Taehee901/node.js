@@ -21,7 +21,7 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 app.use(express.json({ limit: "10mb" })); //크기지정,10kb ->10mb
-app.use(cors());
+app.use(cors()); //서버 정보 넣어주면 어떤요청이든지(어느리소스든) 다 허용해줌,CORS 처리.
 
 app.listen(3000, () => {
   //서버실행
