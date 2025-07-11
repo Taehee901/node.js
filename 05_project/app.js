@@ -65,9 +65,10 @@ app.get("/download/:productId/:fileName", (req, res) => {
   }
 });
 //업로드 ,:파라미터
-app.post("/upload/:filename/:pid", (req, res) => {
+app.post("/upload/:filename/:pid/:type", (req, res) => {
   //객체나 배열에서 원하는 값만 뽑아 변수로 쉽게 만드는  == 디스트럭처링
-  const { filename, pid } = req.params; // /:product가 있을 경우의 params => {filename:'sample.jpg',product:3},오브젝트 Destructuring
+  const { filename, pid, type } = req.params; // /:product가 있을 경우의 params => {filename:'sample.jpg',product:3},오브젝트 Destructuring
+
   // express.urlencoded();
   //
   //상품폴더
@@ -82,15 +83,25 @@ app.post("/upload/:filename/:pid", (req, res) => {
   //const filePath = `${__dirname}/uploads/${pid}/${filename}`; //d:../05_project/uploads/sample.jpg
   //+8 base64이후의 값을 넣어주기 위해서,slice문자열을 잘라내는거,여기서는 lastIndexOf부분을 잘라냄
   //jsp와 비교시
-
-  let data = req.body.data.slice(req.body.data.lastIndexOf(";base64,") + 8); // axios에서 넘겨줄때 data로 넘겨줌
-  fs.writeFile(filePath, data, "base64", (err) => {
-    if (err) {
-      res.send("error");
-    } else {
-      res.send("success");
-    }
-  });
+  try {
+    let base64Data = req.body.data;
+    let data = req.body.data.slice(base64Data.indexOf(";base64,") + 8);
+    // let data = req.body.data.slice(req.body.data.lastIndexOf(";base64,") + 8); // axios에서 넘겨줄때 data로 넘겨줌
+    fs.writeFile(filePath, data, "base64", async (err) => {
+      //pid,type filename =>db.insert. //req.body.where
+      await query("productImageInsert", [
+        { product_id: pid, type: type, path: filename },
+      ]);
+      if (err) {
+        res.send("error");
+      } else {
+        res.send("success");
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(400).send("invalid data");
+  }
 });
 //데이터쿼리: api,alias정보넣어주면 페이지 보여줌
 //라우팅정보를 통해서 실행할 쿼리지정.:alias => url 호출 =>localhost:3000/api/productList()
