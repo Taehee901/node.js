@@ -43,7 +43,7 @@ app.get("/fileupload", (req, res) => {
 //   res.sendFile(__dirname + "/public/index.html"); //특정위치의 파일을 열어줄때 사용,app.js기준으로 -> git-node-05위치-./,전체경로를 다 적어도 되는데 경로바뀔때마다 바꿔야 해서 아래와 같이 사용
 // });
 
-//다운로드,아이디값 파라미터,그 상품 중 어떤걸 다운할건지(파일이름)
+//다운로드,아이디값 파라미터,그 상품 중 어떤걸 다운할건지(파일이름) => 이미지를 가져옴
 app.get("/download/:productId/:fileName", (req, res) => {
   const { productId, fileName } = req.params; //파라미터를 각각 파일에 담겠다는 의미.
   const filepath = `${__dirname}/uploads/${productId}/${fileName}`; //d:div:git:node:05_project,파일가져올경로
@@ -59,6 +59,8 @@ app.get("/download/:productId/:fileName", (req, res) => {
     res.send("파일이 없습니다."); //경로파일에 안맞게 입력하면
   } else {
     fs.createReadStream(filepath).pipe(res); //파일을응답정보에복사하고는 끝,pipe복사
+    //Express(또는 비슷한 서버 프레임워크)에서 응답 본문을 클라이언트에 보낸 뒤 응답을 종료하는 함수라서
+    //추가적인 데이터 전송이 불가능해지기 때문에 주석처리해야한다 하지 않을 경우, 그 이후에 이미지 데이터를 보내도 전송되지 않거나 무시됨
     //res.send("다운로드 완료.");
   }
 });
@@ -90,7 +92,7 @@ app.post("/upload/:filename/:pid", (req, res) => {
     }
   });
 });
-//데이터쿼리
+//데이터쿼리: api,alias정보넣어주면 페이지 보여줌
 //라우팅정보를 통해서 실행할 쿼리지정.:alias => url 호출 =>localhost:3000/api/productList()
 app.post("/api/:alias", async (req, res) => {
   //url쿼리들고옴
