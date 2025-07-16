@@ -74,7 +74,7 @@ module.exports = {
   },
   //상품삭제
   productDelete: {
-    query: `delete from t_product where id = ?`,
+    query: `delete from t_product where id=?`,
   },
   //카테고리 리스트
   categoryList: {

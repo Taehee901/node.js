@@ -12,7 +12,6 @@ const pool = mysql.createPool({
   database: process.env.DATABASE,
   connectionLimit: process.env.LIMIT,
 });
-
 async function query(alias, values) {
   return new Promise((resolve, reject) => {
     pool.query(custSql[alias], values, (err, result) => {
